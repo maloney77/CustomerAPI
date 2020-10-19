@@ -1,0 +1,10 @@
+http:
+  port: "8081"
+
+api:
+  id: "16428642"
+  
+customer:
+  file:
+    name: "Customers-PRD.csv"
+    path: "C:/workspace/customer-data/${env}"

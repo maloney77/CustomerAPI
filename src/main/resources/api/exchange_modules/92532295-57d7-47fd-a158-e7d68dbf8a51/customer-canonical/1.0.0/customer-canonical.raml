@@ -1,0 +1,75 @@
+#%RAML 1.0 DataType
+displayName: Customer Canonical Entity
+description: This datatype describes the fields necessary to transmit a customer entity across the organization.
+
+type: object
+properties:
+  name:
+    type: object
+    description: Name object to identify the customer.
+    required: false
+    properties:
+      first:
+        type: string
+        description: First name of the customer. 
+        example: "John"
+        required: true
+      last:
+        type: string
+        description:  Last name of the customer.
+        example: "Doe"
+        required: true
+      middle:
+        type: string
+        description: Middle name of the customer. 
+        example: "Edward"
+        required: false
+  birthdate:
+    type: string
+    description: Date of birth for the customer. 
+    example: "03.24.1995"
+    required: true
+  height:
+    type: number
+    description: The height of the customer, in inches.
+    example: 71
+    required: false
+  weight:
+    type: number
+    description: The weight of the customer, in pounds.
+    example: 187
+    required: false
+  billTo:
+    type: object
+    description: The entity that deals with billing information for the customer.
+    required: false
+    properties:
+      address:
+        type: object
+        properties:
+          street:
+            type: string
+            description: The street that the billing party resides on.
+            example: "123 Main Street"
+            required: false
+          city:
+            type: string
+            description: The city that the billing party resides in.
+            example: "St. Louis"
+            required: false
+          state:
+            type: string
+            description: The state that the billing party resides in.
+            example: "Missouri"
+            required: false
+          zipcode:
+            type: string
+            description: The zipcode that the billing party resides in.
+            example: "63222"
+            required: false
+          country:
+            type: string
+            description: The country code that the billing party resides in.
+            example: USA
+            required: false
+  

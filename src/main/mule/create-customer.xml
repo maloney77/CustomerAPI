@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="post:\customers:application\json:mseai-customer-management-system-config">
+		
+		<flow-ref doc:name="checkIfFileExists" doc:id="cf9f98d0-9dfb-4a80-8bbd-fbf0b7f386c9" name="checkIfFileExists"/>
+		<logger level="INFO" doc:name="Logger if file exists" doc:id="7c534b7a-e31a-4525-8fbd-92b8bf10afed" message="Customer file exists : #[vars.fileExists]" />
+		<set-variable value="#[uuid()]" doc:name="clientKey" doc:id="bafa3e46-b886-448d-941d-9de68882e548" variableName="clientKey"/>
+		<choice doc:name="If File Exists" doc:id="97ffdd79-7ed4-4ff4-9eed-36912a9cd143" >
+			<when expression="#[vars.fileExists]">
+				<ee:transform doc:name="transform to customer append" doc:id="15b2e409-29a6-4cc2-823c-653973a82fca">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/csv header=false
+---
+{
+	"Client Key": vars.clientKey,
+    "BirthDate": (payload.birthdate as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
+    as DateTime {format: "yyyy-MM-dd'T'HH:mm:ssZ"} 
+    as Number {unit: "milliseconds"},
+    "First Name": payload.name.first,
+    "Middle Name": payload.name.middle,
+    "Last Name": payload.name.last,
+    "Height": payload.height,
+    "Weight": payload.weight,
+    "Billing Street": payload.billTo.address.street,
+    "Billing City": payload.billTo.address.city,
+    "Billing State": payload.billTo.address.state,
+    "Billing Postal Code": payload.billTo.address.zipcode,
+    "Billing Country": payload.billTo.address.country,
+    "Created Date": now() as Number {unit: "milliseconds"}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="5bcedb7e-ebb1-4e7a-871d-ce0a8b80f920" message="Customer file already exists, appending to existing file"/>
+				<file:write doc:name="Append record to existing file" doc:id="9ab23b6e-30fe-476a-b946-10ab6e3631dc" path="${customer.file.path}/${customer.file.name}" createParentDirectories="false" mode="APPEND" />
+			</when>
+			<otherwise >
+				<ee:transform doc:name="transform to new customer csv file" doc:id="d32cdd95-e72b-402e-9375-da8410cd5685">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv 
+---
+{
+	"Client Key": vars.clientKey,
+    "BirthDate": (payload.birthdate as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
+    as DateTime {format: "yyyy-MM-dd'T'HH:mm:ssZ"} 
+    as Number {unit: "milliseconds"},
+    "First Name": payload.name.first,
+    "Middle Name": payload.name.middle,
+    "Last Name": payload.name.last,
+    "Height": payload.height,
+    "Weight": payload.weight,
+    "Billing Street": payload.billTo.address.street,
+    "Billing City": payload.billTo.address.city,
+    "Billing State": payload.billTo.address.state,
+    "Billing Postal Code": payload.billTo.address.zipcode,
+    "Billing Country": payload.billTo.address.country,
+    "Created Date": now() as Number {unit: "milliseconds"}
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="67e546b0-f63e-4aed-9d8e-647afa388efa" message="Customer file does not exist, creating new file with incoming customer" />
+				<file:write doc:id="70006ade-6bc9-4ebb-bc30-4f91bceae36a" path="${customer.file.path}/${customer.file.name}" doc:name="Create new file with incoming customer" mode="CREATE_NEW" />
+			</otherwise>
+		</choice>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="set successful response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  success: true,
+  customerKey: vars.clientKey,
+  correlationId: correlationId
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<sub-flow name="checkIfFileExists" doc:id="b0867cc1-f9dd-4812-811a-cc92292fb121" >
+		<try doc:name="Try" doc:id="f6633f0b-8bb4-4620-a36c-ffbf1700f71c" >
+			<file:read doc:name="Read Existing Customer File" doc:id="3727fddc-7015-472c-b990-abac69cea94e" path="${customer.file.path}/${customer.file.name}" target="existingFile"/>
+			<set-variable value="#[true]" doc:name="fileExists" doc:id="d3b3d3f3-0aa3-4b71-ac6f-dea9d8099e52" variableName="fileExists"/>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1a3d053a-4bfa-486c-898e-0ca5f8263cf5" >
+					<ee:transform doc:name="fileExists, fileCheckError" doc:id="96c37dcc-cb28-47eb-b1ac-71059aa75364" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="fileExists" ><![CDATA[%dw 2.0
+output application/java
+---
+false]]></ee:set-variable>
+							<ee:set-variable variableName="fileCheckError" ><![CDATA[%dw 2.0
+output application/java
+---
+error.description]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-continue>
+			</error-handler>
+		</try>
+		
+	</sub-flow>
+	</mule>

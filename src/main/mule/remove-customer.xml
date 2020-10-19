@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="delete:\customers:mseai-customer-management-system-config">
+		<set-variable value="#[attributes.queryParams.customerKey]" doc:name="customerKey" doc:id="63df7f61-5155-407e-bc73-2b170c3d8583" variableName="customerKey"/>
+		<file:read doc:name="Read Existing Customer File" doc:id="75a51d4f-7a91-4ea1-8a71-28e0ab7ec546" path="${customer.file.path}/${customer.file.name}" />
+		<logger level="INFO" doc:name="Logger" doc:id="8c997c5a-1378-4690-aed4-c8cdd7ac72d1" message="Retrieved existing records, checking if record exists."/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="check if customer exists">
+            <ee:message>
+            </ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customerExists" ><![CDATA[%dw 2.0
+output application/java
+---
+if((payload filter ((item, index) -> item."Client Key" == vars.customerKey))[0] == null) false else true]]></ee:set-variable>
+			</ee:variables>
+        </ee:transform>
+		<choice doc:name="If customer exists" doc:id="ce722f9b-5cec-4e5b-aa93-3505863e4a6f" >
+			<when expression="#[vars.customerExists]">
+				<logger level="INFO" doc:name="Customer Exists" doc:id="ddae0311-043b-4f44-bef1-71482b591fc7" message="Customer Exists"/>
+				<ee:transform doc:name="remove customer" doc:id="4a92d521-2c20-4dcc-b23d-6193a2b112a5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+---
+payload filter ((item, index) -> item."Client Key" != vars.customerKey)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<file:write doc:name="Overwrite existing file with new list, without inbound customer" doc:id="ea29a4d0-1aff-4681-9312-6f52641ca4fd" path="${customer.file.path}/${customer.file.name}"/>
+				<logger level="INFO" doc:name="Logger" doc:id="b113603e-c641-4147-a21c-ae6e829c9250" message="Successfully removed customer entry with key: #[vars.customerKey] from existing file."/>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Customer does not exist" doc:id="c8b48bbe-0c8d-4172-8122-cfd0a683b568" message="Customer with id: #[vars.customerKey] does not exist"/>
+				<raise-error doc:name="Raise error that no records were found" doc:id="0f86dc88-7544-466e-9f64-d1b693876959" type="RECORDS:NOT_FOUND" description="No records found in existing file." />
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="49803d72-5746-422f-a147-88cd01a31772" type="FILE:ILLEGAL_PATH, RECORDS:NOT_FOUND" >
+				<ee:transform doc:name="Set error response payload" doc:id="6483903c-fdf2-41f1-a98e-be2e0fc92da7" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "success": false,
+  "message": "No records found, if you feel this was in error please contact support with the following correlationId.",
+  "correlationId": correlationId
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+	
+	</mule>

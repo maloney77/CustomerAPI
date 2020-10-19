@@ -1,0 +1,89 @@
+#%RAML 1.0
+title: mseai-customer-management-system
+
+description: This API is used to perform basic CRUD operations on customer entry data.
+
+traits:
+  client-id-enforced:
+    headers:
+      client_id:
+        type: string
+        description: Username unique to the calling client.
+        example: "010beace-4d19-42b6-803d-92c82ff6ef48"
+      client_secret:
+        type: string
+        description: Password unique to the calling client.
+        example: "6b92761d-5840-4408-8053-094449b86a58"
+
+types:
+  customerEntity: !include exchange_modules/92532295-57d7-47fd-a158-e7d68dbf8a51/customer-canonical/1.0.0/customer-canonical.raml
+
+/customers:
+  is: 
+    - client-id-enforced
+  post:
+    description: This method is used to create new customer data entries in the underlying system. It will create a new storage device if none exists or a new record if the storage device exists.
+    body:
+      application/json:
+        type: customerEntity
+    responses:
+      201:
+        body:
+          application/json:
+            example: !include examples/createdResponse.json
+      500:
+        body:
+          application/json:
+            example: !include examples/500errorResponse.json
+  get:
+    description: This method is used to retrieve customer data from the underlying system. It will return all data that is currently stored.
+    responses:
+      200:
+        body:
+          application/json:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  type: customerEntity
+                  properties:
+                    customerKey:
+                      type: string
+                      description: Unique identifier for a customer entity.
+                      example: "f6ea7f45-306d-4c8a-8e3a-b619a21d415a"
+                    createdDate:
+                      type: string
+                      description: The date that the customer record was created.
+                      example: "10.19.2020"
+              results:
+                type: number
+                description: The number of records returned.
+                example: 20
+      404:
+        body:
+          application/json:
+            example: !include examples/404ErrorResponse.json
+      500:
+        body:
+          application/json:
+            example: !include examples/500errorResponse.json
+      
+  delete:
+    description: This method is used to delete a customer record in the underlying system. It uses a unique query parameter to delete specific customers and returns no body on success.
+    queryParameters:
+      customerKey:
+        type: string
+        description: Unique identifier used to delete a customer record
+        example: "af976d66-822c-4f8b-9c6c-0ba5e21f0584"
+    responses:
+      204:
+      404:
+        body:
+          application/json:
+            example: !include examples/404ErrorResponse.json
+      500:
+        body:
+          application/json:
+            example: !include examples/500errorResponse.json
+      

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="get:\customers:mseai-customer-management-system-config">
+        <file:read doc:name="Read Existing Customer File" doc:id="4d455202-26cb-4778-ac21-e0126e5d0da0" path="${customer.file.path}/${customer.file.name}"/>
+		<choice doc:name="Check if records exist" doc:id="463e2eba-af89-4c0b-9606-bb091963ebf7" >
+			<when expression="#[output application/java --- isEmpty(payload)]">
+				<raise-error doc:name="Raise error that no records were found" doc:id="7fb53cfb-70ef-4773-b132-1d68c7808d68" type="RECORDS:NOT_FOUND" description="No records found in existing file."/>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="d04fea9c-81d8-4987-9899-5de037d170ce" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+fun convertEpochToDate (epochTime) = 
+(((epochTime as Number)/1000) as DateTime as String {format: "dd.MM.yyyy"}) default null
+---
+{
+    data: payload map  {
+        "customerKey": $."Client Key",
+        "birthdate": convertEpochToDate($.BirthDate),
+        "name": {
+            "first": $."First Name",
+            "last": $."Last Name",
+            "middle": $."Middle Name"
+        },
+        "billTo": {
+            "address": $."Billing Street" ++ " " ++ 
+            $."Billing City" ++ " " ++ 
+            $."Billing State" ++ " " ++ 
+            $."Billing Postal Code" ++ " " ++ 
+            $."Billing Country"
+        },
+        "weight": $."Weight",
+        "height": $."Height",
+        "createdDate": convertEpochToDate($."Created Date")
+    },
+    totalRecords: sizeOf(payload)
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c1aa27eb-89c0-4a02-b798-64e3f0659094" type="FILE:ILLEGAL_PATH, RECORDS:NOT_FOUND">
+				<ee:transform doc:name="Set error response payload" doc:id="ff6aef4a-8662-433c-8d18-039efe754629" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "success": false,
+  "message": "No records found, if you feel this was in error please contact support with the following correlationId.",
+  "correlationId": correlationId
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+404]]></ee:set-variable>
+					</ee:variables>
+					
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+    </flow>
+	</mule>
