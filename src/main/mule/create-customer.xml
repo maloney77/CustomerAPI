@@ -78,7 +78,7 @@ output application/json
 ---
 {
   success: true,
-  clientKey: vars.customerKey,
+  clientKey: vars.clientkey,
   correlationId: correlationId
 }]]></ee:set-payload>
             </ee:message>
