@@ -21,6 +21,9 @@ output application/json
 
 fun convertEpochToDate (epochTime) = 
 (((epochTime as Number)/1000) as DateTime as String {format: "dd.MM.yyyy"}) default null
+
+fun addressNullCheck (addressAttribute) = 
+	if(addressAttribute == "" or addressAttribute == null) "" else (addressAttribute ++ " ")
 ---
 {
     Data: payload map  {
@@ -29,11 +32,11 @@ fun convertEpochToDate (epochTime) =
         "First Name": $."First Name",
         "Last Name": $."Last Name",
         "Middle Name": $."Middle Name",
-        "Billing Address": $."Billing Street" ++ " " ++ 
-            $."Billing City" ++ " " ++ 
-            $."Billing State" ++ " " ++ 
-            $."Billing Postal Code" ++ " " ++ 
-            $."Billing Country",
+        "Billing Address": addressNullCheck($."Billing Street") ++ 
+            addressNullCheck($."Billing City") ++ 
+            addressNullCheck($."Billing State") ++ 
+            addressNullCheck($."Billing Postal Code") ++ 
+            trim(addressNullCheck($."Billing Country")),
         "Weight": $."Weight",
         "Height": $."Height",
         "Created Date": convertEpochToDate($."Created Date")
