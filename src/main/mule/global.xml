@@ -1,18 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<apikit:config name="mseai-customer-management-system-config" api="mseai-customer-management-system.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
 	<http:listener-config name="mseai-customer-management-system-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="${http.port}" />
     </http:listener-config>
 	<configuration-properties doc:name="Configuration properties" doc:id="ae815bf6-32e4-4d9f-948f-55f320e4252e" file="${env}.yaml" />
 	<api-gateway:autodiscovery apiId="${api.id}" doc:name="API Autodiscovery" doc:id="2c9d79cc-bd45-44ae-9bbe-f4c53845e5b1" flowRef="mseai-customer-management-system-main" />
+	<configuration doc:name="Configuration" doc:id="ed819cfb-f766-4afa-b4db-444d5d6b947a" defaultErrorHandler-ref="GlobalErrorHandler" />
+	<error-handler name="GlobalErrorHandler" doc:id="d8280d52-138d-4e13-afbb-5ca88704989d" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="274cac5d-dc5d-412c-b1b6-9002232d7cfa" type="ANY">
+			<logger level="INFO" doc:name="Log Error" doc:id="7abc8f5e-8bec-4b64-87d2-4579db420ca2" message="An unexpected error occurred: #[error.description]"/>
+			<ee:transform doc:name="transform response payload" doc:id="d7313dff-acad-44c7-9735-1c7183224011" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "success": false,
+  "message": "An unexpected error occurred: " ++ error.description,
+  "correlationId": correlationId
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[%dw 2.0
+output application/java
+---
+500]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-continue>
+	</error-handler>
 	
 </mule>
