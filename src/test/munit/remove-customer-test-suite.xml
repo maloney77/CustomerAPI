@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="remove-customer-test-suite.xml" />
+	<munit:test name="remove-customer-routing" doc:id="e8f0c8df-eea8-4e99-a77b-742fd1e4c6f3" description="remote customer should route to overwrite file connector when customer exists in existing file">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock file read" doc:id="88d33b4d-0667-4a80-a9de-dbb696ebb752" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Read Existing Customer File" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="75a51d4f-7a91-4ea1-8a71-28e0ab7ec546" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/csv --- [
+  {
+    "Client Key": "6100f93f-f33e-4793-af15-78a254dda4ef",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143684782"
+  },
+  {
+    "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143720795"
+  },
+  {
+    "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "",
+    "Billing City": "",
+    "Billing State": "",
+    "Billing Postal Code": "",
+    "Billing Country": "",
+    "Created Date": "1603143721366"
+  }
+]]
+' mediaType="application/csv" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock file overwrite" doc:id="b8f56ddf-8ad0-4f11-b0d4-68f4ae1fc7c1" processor="file:write" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Overwrite existing file with new list, without inbound customer" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ea29a4d0-1aff-4681-9312-6f52641ca4fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="56cfc007-f05c-444f-9e49-88c4970c30db" >
+				<munit:attributes value='#[output application/java --- {
+	"queryParams": {
+		"clientKey": "6100f93f-f33e-4793-af15-78a254dda4ef"
+	}
+}]' mediaType="application/java" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to delete:\customers:mseai-customer-management-system-config" doc:id="354da56f-f66c-4ae6-8c9f-5636f1e450be" name="delete:\customers:mseai-customer-management-system-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="efa2575d-ba8b-4b0a-b5b0-617e5802e903" processor="file:write" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Overwrite existing file with new list, without inbound customer" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ea29a4d0-1aff-4681-9312-6f52641ca4fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="remove-customer-routing-to-error" doc:id="c6fad681-c9eb-48ea-b2a1-56700b990863" description="remote customer should route to raise error when customer does not exist in existing file">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock file read" doc:id="20206a6c-1d0b-4692-a002-45284f6f337f" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Read Existing Customer File" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="75a51d4f-7a91-4ea1-8a71-28e0ab7ec546" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/csv --- [
+  {
+    "Client Key": "6100f93f-f33e-4793-af15-78a254dda4ef",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143684782"
+  },
+  {
+    "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143720795"
+  },
+  {
+    "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "",
+    "Billing City": "",
+    "Billing State": "",
+    "Billing Postal Code": "",
+    "Billing Country": "",
+    "Created Date": "1603143721366"
+  }
+]]
+' mediaType="application/csv" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock file overwrite" doc:id="5303f8c4-a4b4-4f3e-a7d3-dcfd493ea464" processor="raise-error" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Raise error that no records were found" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0f86dc88-7544-466e-9f64-d1b693876959" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="cca852e8-a52a-4a81-8bfc-049135e2fc07" >
+				<munit:attributes value='#[output application/java --- {
+	"queryParams": {
+		"clientKey": "not a key"
+	}
+}]' mediaType="application/java" />
+
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to delete:\customers:mseai-customer-management-system-config" doc:id="eec1187d-5ec2-457c-92ff-5aff4df358a0" name="delete:\customers:mseai-customer-management-system-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="319ce119-6db4-48e0-a043-7c5d69580a91" processor="raise-error" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Raise error that no records were found" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="0f86dc88-7544-466e-9f64-d1b693876959" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

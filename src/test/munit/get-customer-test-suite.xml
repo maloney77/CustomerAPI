@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="get-customer-test-suite.xml" />
+	<munit:test name="get-customer-payload-assertion" doc:id="e2f7b2c1-3d62-4f30-b0e8-b350d6e14482" description="the payload returned on a successful call should be transformed correctly">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock file read" doc:id="aae3f76d-8838-4e90-95f7-3e49df5eadb2" processor="file:read">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Read Existing Customer File" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="4d455202-26cb-4778-ac21-e0126e5d0da0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/csv --- [
+  {
+    "Client Key": "6100f93f-f33e-4793-af15-78a254dda4ef",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143684782"
+  },
+  {
+    "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143720795"
+  },
+  {
+    "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "",
+    "Billing City": "",
+    "Billing State": "",
+    "Billing Postal Code": "",
+    "Billing Country": "",
+    "Created Date": "1603143721366"
+  }
+]]
+' mediaType="application/csv" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\customers:mseai-customer-management-system-config" doc:id="24ddc315-7287-4807-8e88-e88597851065" name="get:\customers:mseai-customer-management-system-config"/>
+		</munit:execution>
+		<munit:validation>
+			<set-variable value="#[output application/json --- payload]" doc:name="actual" doc:id="8ece6938-5278-4720-b45e-036e5767d513" variableName="actual"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ae006280-5d3d-4847-a6fa-b3c3b7863adb" expression="#[vars.actual]" is='#[MunitTools::equalTo({
+  "Data": [
+    {
+      "Client Key": "6100f93f-f33e-4793-af15-78a254dda4ef",
+      "BirthDate": "24.03.1995",
+      "First Name": "John",
+      "Last Name": "Doe",
+      "Middle Name": "Edward",
+      "Billing Address": "123 Main Street St. Louis Missouri 63222 USA",
+      "Weight": "187",
+      "Height": "71",
+      "Created Date": "19.10.2020"
+    },
+    {
+      "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+      "BirthDate": "24.03.1995",
+      "First Name": "John",
+      "Last Name": "Doe",
+      "Middle Name": "Edward",
+      "Billing Address": "123 Main Street St. Louis Missouri 63222 USA",
+      "Weight": "187",
+      "Height": "71",
+      "Created Date": "19.10.2020"
+    },
+    {
+      "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+      "BirthDate": "24.03.1995",
+      "First Name": "John",
+      "Last Name": "Doe",
+      "Middle Name": "Edward",
+      "Billing Address": "",
+      "Weight": "187",
+      "Height": "71",
+      "Created Date": "19.10.2020"
+    }
+  ],
+  "Total Results": 3
+})]'/>
+
+		</munit:validation>
+	</munit:test>
+	<munit:test name="get-customer-raise-error-verify" doc:id="84dc8348-008f-4be5-9300-0c0bd3c2e3c7" description="Get customer should raise error when no customer records exist">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock file read" doc:id="915dc192-5814-4890-8e82-02de4f84ec35" processor="file:read">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Read Existing Customer File" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="4d455202-26cb-4778-ac21-e0126e5d0da0" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/csv --- []]" mediaType="application/csv" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when error is raised" doc:id="6151d185-dbb5-4026-b56a-3d1f73b47f00" processor="raise-error">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Raise error that no records were found" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="7fb53cfb-70ef-4773-b132-1d68c7808d68" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to get:\customers:mseai-customer-management-system-config" doc:id="e98e52f9-f41a-429b-91ed-2bef3ba963cc" name="get:\customers:mseai-customer-management-system-config" />
+			</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="871d4427-3d32-48b7-be85-2b95b8f3b496" processor="raise-error" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Raise error that no records were found" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="7fb53cfb-70ef-4773-b132-1d68c7808d68" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+		</munit:test>
+
+
+</mule>

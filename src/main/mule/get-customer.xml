@@ -45,7 +45,9 @@ fun addressNullCheck (addressAttribute) =
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-			</otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="9d0f6d28-3223-4f5c-91bc-ab24cbfd13b7" message="response payload: #[payload]"/>
+			
+</otherwise>
 		</choice>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="c1aa27eb-89c0-4a02-b798-64e3f0659094" type="FILE:ILLEGAL_PATH, RECORDS:NOT_FOUND">
