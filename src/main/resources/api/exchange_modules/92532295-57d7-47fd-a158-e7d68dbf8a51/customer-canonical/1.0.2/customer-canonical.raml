@@ -1,0 +1,62 @@
+#%RAML 1.0 DataType
+displayName: Customer Canonical Entity
+description: This datatype describes the fields necessary to transmit a customer entity across the organization.
+
+type: object
+properties:
+  First Name:
+    type: string
+    description: First name of the customer. 
+    example: "John"
+    required: true
+  Last Name:
+    type: string
+    description:  Last name of the customer.
+    example: "Doe"
+    required: true
+  Middle Name:
+    type: string
+    description: Middle name of the customer. 
+    example: "Edward"
+    required: false
+  BirthDate:
+    type: string
+    description: Date of birth for the customer (format DD.MM.YYYY). 
+    example: "24.03.1995"
+    required: true
+  Height:
+    type: number
+    description: The height of the customer, in inches.
+    example: 71
+    required: false
+  Weight:
+    type: number
+    description: The weight of the customer, in pounds.
+    example: 187
+    required: false
+  Billing Street:
+    type: string
+    description: The street that the billing party resides on.
+    example: "123 Main Street"
+    required: false
+  Billing City:
+    type: string
+    description: The city that the billing party resides in.
+    example: "St. Louis"
+    required: false
+  Billing State:
+    type: string
+    description: The state that the billing party resides in.
+    example: "Missouri"
+    required: false
+  Billing Postal Code:
+    type: string
+    description: The zipcode that the billing party resides in.
+    example: "63222"
+    required: false
+  Billing Country:
+    type: string
+    description: The country code that the billing party resides in.
+    example: USA
+    required: false
+  

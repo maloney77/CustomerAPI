@@ -21,19 +21,19 @@ output application/csv header=false
 ---
 {
 	"Client Key": vars.clientKey,
-    "BirthDate": (payload.birthdate as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
+    "BirthDate": (payload."BirthDate" as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
     as DateTime {format: "yyyy-MM-dd'T'HH:mm:ssZ"} 
     as Number {unit: "milliseconds"},
-    "First Name": payload.name.first,
-    "Middle Name": payload.name.middle,
-    "Last Name": payload.name.last,
-    "Height": payload.height,
-    "Weight": payload.weight,
-    "Billing Street": payload.billTo.address.street,
-    "Billing City": payload.billTo.address.city,
-    "Billing State": payload.billTo.address.state,
-    "Billing Postal Code": payload.billTo.address.zipcode,
-    "Billing Country": payload.billTo.address.country,
+    "First Name": payload."First Name",
+    "Middle Name": payload."Middle Name",
+    "Last Name": payload."Last Name",
+    "Height": payload.Height,
+    "Weight": payload.Weight,
+    "Billing Street": payload."Billing Street",
+    "Billing City": payload."Billing City",
+    "Billing State": payload."Billing State",
+    "Billing Postal Code": payload."Billing Postal Code",
+    "Billing Country": payload."Billing Country",
     "Created Date": now() as Number {unit: "milliseconds"}
 }]]></ee:set-payload>
 			</ee:message>
@@ -49,19 +49,19 @@ output application/csv
 ---
 {
 	"Client Key": vars.clientKey,
-    "BirthDate": (payload.birthdate as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
+    "BirthDate": (payload."BirthDate" as Date {format: "dd.MM.yyyy"}) as String {format: "yyyy-MM-dd'T'00:00:00+0000"} 
     as DateTime {format: "yyyy-MM-dd'T'HH:mm:ssZ"} 
     as Number {unit: "milliseconds"},
-    "First Name": payload.name.first,
-    "Middle Name": payload.name.middle,
-    "Last Name": payload.name.last,
-    "Height": payload.height,
-    "Weight": payload.weight,
-    "Billing Street": payload.billTo.address.street,
-    "Billing City": payload.billTo.address.city,
-    "Billing State": payload.billTo.address.state,
-    "Billing Postal Code": payload.billTo.address.zipcode,
-    "Billing Country": payload.billTo.address.country,
+    "First Name": payload."First Name",
+    "Middle Name": payload."Middle Name",
+    "Last Name": payload."Last Name",
+    "Height": payload.Height,
+    "Weight": payload.Weight,
+    "Billing Street": payload."Billing Street",
+    "Billing City": payload."Billing City",
+    "Billing State": payload."Billing State",
+    "Billing Postal Code": payload."Billing Postal Code",
+    "Billing Country": payload."Billing Country",
     "Created Date": now() as Number {unit: "milliseconds"}
 }]]></ee:set-payload>
 					</ee:message>
@@ -78,7 +78,7 @@ output application/json
 ---
 {
   success: true,
-  customerKey: vars.clientKey,
+  clientKey: vars.clientKey,
   correlationId: correlationId
 }]]></ee:set-payload>
             </ee:message>

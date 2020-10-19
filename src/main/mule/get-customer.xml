@@ -23,26 +23,22 @@ fun convertEpochToDate (epochTime) =
 (((epochTime as Number)/1000) as DateTime as String {format: "dd.MM.yyyy"}) default null
 ---
 {
-    data: payload map  {
-        "customerKey": $."Client Key",
-        "birthdate": convertEpochToDate($.BirthDate),
-        "name": {
-            "first": $."First Name",
-            "last": $."Last Name",
-            "middle": $."Middle Name"
-        },
-        "billTo": {
-            "address": $."Billing Street" ++ " " ++ 
+    Data: payload map  {
+        "Client Key": $."Client Key",
+        "BirthDate": convertEpochToDate($.BirthDate),
+        "First Name": $."First Name",
+        "Last Name": $."Last Name",
+        "Middle Name": $."Middle Name",
+        "Billing Address": $."Billing Street" ++ " " ++ 
             $."Billing City" ++ " " ++ 
             $."Billing State" ++ " " ++ 
             $."Billing Postal Code" ++ " " ++ 
-            $."Billing Country"
-        },
-        "weight": $."Weight",
-        "height": $."Height",
-        "createdDate": convertEpochToDate($."Created Date")
+            $."Billing Country",
+        "Weight": $."Weight",
+        "Height": $."Height",
+        "Created Date": convertEpochToDate($."Created Date")
     },
-    totalRecords: sizeOf(payload)
+    "Total Results": sizeOf(payload)
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>

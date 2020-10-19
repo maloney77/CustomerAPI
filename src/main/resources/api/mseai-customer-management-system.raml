@@ -16,7 +16,7 @@ traits:
         example: "6b92761d-5840-4408-8053-094449b86a58"
 
 types:
-  customerEntity: !include exchange_modules/92532295-57d7-47fd-a158-e7d68dbf8a51/customer-canonical/1.0.0/customer-canonical.raml
+  customerEntity: !include exchange_modules/92532295-57d7-47fd-a158-e7d68dbf8a51/customer-canonical/1.0.2/customer-canonical.raml
 
 /customers:
   is: 
@@ -43,27 +43,28 @@ types:
           application/json:
             type: object
             properties:
-              data:
+              Data:
                 type: array
                 items:
                   type: customerEntity
                   properties:
-                    customerKey:
+                    Client Key:
                       type: string
                       description: Unique identifier for a customer entity.
                       example: "f6ea7f45-306d-4c8a-8e3a-b619a21d415a"
-                    createdDate:
+                    Created Date:
                       type: string
                       description: The date that the customer record was created.
-                      example: "10.19.2020"
-              results:
+                      example: "19.10.2020"
+              Total Results:
                 type: number
                 description: The number of records returned.
-                example: 20
+                example: 1
+            example: !include examples/successGetResponse.json
       404:
         body:
           application/json:
-            example: !include examples/404ErrorResponse.json
+            example: !include examples/404GetErrorResponse.json
       500:
         body:
           application/json:
@@ -72,7 +73,7 @@ types:
   delete:
     description: This method is used to delete a customer record in the underlying system. It uses a unique query parameter to delete specific customers and returns no body on success.
     queryParameters:
-      customerKey:
+      clientKey:
         type: string
         description: Unique identifier used to delete a customer record
         example: "af976d66-822c-4f8b-9c6c-0ba5e21f0584"

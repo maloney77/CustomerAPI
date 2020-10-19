@@ -1,5 +1,5 @@
 {
   "success": false,
-  "message": "Customer with id f6ea7f45-306d-4c8a-8e3a-b619a21d415a was not found, if you feel this was in error please contact support with the following correlationId.",
+  "message": "Client with id f6ea7f45-306d-4c8a-8e3a-b619a21d415a was not found, if you feel this was in error please contact support with the following correlationId.",
   "correlationId": "33c3a8d4-33e0-42e2-aa3c-de254ae736cd"
 }

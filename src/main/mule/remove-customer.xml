@@ -8,7 +8,7 @@
 	http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="delete:\customers:mseai-customer-management-system-config">
-		<set-variable value="#[attributes.queryParams.customerKey]" doc:name="customerKey" doc:id="63df7f61-5155-407e-bc73-2b170c3d8583" variableName="customerKey"/>
+		<set-variable value="#[attributes.queryParams.clientKey]" doc:name="customerKey" doc:id="63df7f61-5155-407e-bc73-2b170c3d8583" variableName="customerKey"/>
 		<file:read doc:name="Read Existing Customer File" doc:id="75a51d4f-7a91-4ea1-8a71-28e0ab7ec546" path="${customer.file.path}/${customer.file.name}" />
 		<logger level="INFO" doc:name="Logger" doc:id="8c997c5a-1378-4690-aed4-c8cdd7ac72d1" message="Retrieved existing records, checking if record exists."/>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="check if customer exists">
