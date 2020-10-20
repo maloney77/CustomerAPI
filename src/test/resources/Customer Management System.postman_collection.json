@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "0b5cb021-a85d-417c-ba0a-1024f3ac5964",
+		"name": "Customer Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Customer Local",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "3ae56ba3c2c54dacb8908a99a12b2510",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "a7db0fDC72f240B48a24A82f819fA25D",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/api/customers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Customer Local",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "3ae56ba3c2c54dacb8908a99a12b2510",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "a7db0fDC72f240B48a24A82f819fA25D",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"First Name\": \"John\",\r\n  \"Last Name\": \"Doe\",\r\n  \"Middle Name\": \"Edward\",\r\n  \"BirthDate\": \"24.03.1995\",\r\n  \"Height\": 71,\r\n  \"Weight\": 187,\r\n  \"Billing Street\": \"123 Main Street\",\r\n  \"Billing City\": \"St. Louis\",\r\n  \"Billing State\": \"Missouri\",\r\n  \"Billing Postal Code\": \"63222\",\r\n  \"Billing Country\": \"USA\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/customers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Customer Local",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "3ae56ba3c2c54dacb8908a99a12b2510",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "a7db0fDC72f240B48a24A82f819fA25D",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/api/customers?clientKey=929f879a-8a6d-4466-a0b2-f475de25bff7",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"customers"
+					],
+					"query": [
+						{
+							"key": "clientKey",
+							"value": "929f879a-8a6d-4466-a0b2-f475de25bff7"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
