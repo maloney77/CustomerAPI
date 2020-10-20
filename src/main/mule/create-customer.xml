@@ -85,28 +85,9 @@ output application/json
         </ee:transform>
     </flow>
 	<sub-flow name="checkIfFileExists" doc:id="b0867cc1-f9dd-4812-811a-cc92292fb121" >
-		<try doc:name="Try" doc:id="f6633f0b-8bb4-4620-a36c-ffbf1700f71c" >
-			<file:read doc:name="Read Existing Customer File" doc:id="3727fddc-7015-472c-b990-abac69cea94e" path="${customer.file.path}/${customer.file.name}" target="existingFile"/>
-			<set-variable value="#[true]" doc:name="fileExists" doc:id="d3b3d3f3-0aa3-4b71-ac6f-dea9d8099e52" variableName="fileExists"/>
-			<error-handler >
-				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1a3d053a-4bfa-486c-898e-0ca5f8263cf5" >
-					<ee:transform doc:name="fileExists, fileCheckError" doc:id="96c37dcc-cb28-47eb-b1ac-71059aa75364" >
-						<ee:message >
-						</ee:message>
-						<ee:variables >
-							<ee:set-variable variableName="fileExists" ><![CDATA[%dw 2.0
-output application/java
----
-false]]></ee:set-variable>
-							<ee:set-variable variableName="fileCheckError" ><![CDATA[%dw 2.0
-output application/java
----
-error.description]]></ee:set-variable>
-						</ee:variables>
-					</ee:transform>
-				</on-error-continue>
-			</error-handler>
-		</try>
+		<file:list doc:name="List files in directory" doc:id="b83e72c5-fbac-42dc-b213-2e614dbc373a" directoryPath="${customer.file.path}" target="existingFiles"/>
+		<set-variable value="#[sizeOf(vars.existingFiles) != 0 and sizeOf(vars.existingFiles.attributes filter((item, index) -&gt; item.fileName == p('customer.file.name'))) &gt; 0]" doc:name="fileExists" doc:id="d3b3d3f3-0aa3-4b71-ac6f-dea9d8099e52" variableName="fileExists" />
 		
-	</sub-flow>
+	
+</sub-flow>
 	</mule>
