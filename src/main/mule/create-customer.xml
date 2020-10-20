@@ -13,7 +13,8 @@
 		<logger level="INFO" doc:name="Logger if file exists" doc:id="7c534b7a-e31a-4525-8fbd-92b8bf10afed" message="Customer file exists : #[vars.fileExists]" />
 		<set-variable value="#[uuid()]" doc:name="clientKey" doc:id="bafa3e46-b886-448d-941d-9de68882e548" variableName="clientKey"/>
 		<choice doc:name="If File Exists" doc:id="97ffdd79-7ed4-4ff4-9eed-36912a9cd143" >
-			<when expression="#[vars.fileExists]">
+			<when expression="#[vars.fileExists and vars.existingFiles.attributes.size[0] != 0]">
+				<logger level="INFO" doc:name="Log payload" doc:id="2c4a1e19-8080-4a88-a558-7dc3752f567a" message="payload before transform to append: #[payload]"/>
 				<ee:transform doc:name="transform to customer append" doc:id="15b2e409-29a6-4cc2-823c-653973a82fca">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -40,8 +41,10 @@ output application/csv header=false
 		</ee:transform>
 				<logger level="INFO" doc:name="Logger" doc:id="5bcedb7e-ebb1-4e7a-871d-ce0a8b80f920" message="Customer file already exists, appending to existing file"/>
 				<file:write doc:name="Append record to existing file" doc:id="9ab23b6e-30fe-476a-b946-10ab6e3631dc" path="${customer.file.path}/${customer.file.name}" createParentDirectories="false" mode="APPEND" />
-			</when>
+			
+</when>
 			<otherwise >
+				<logger level="INFO" doc:name="Log payload" doc:id="9e827c7c-8bfb-41e9-af48-28793b213c79" message="payload before transform to new file: #[payload]" />
 				<ee:transform doc:name="transform to new customer csv file" doc:id="d32cdd95-e72b-402e-9375-da8410cd5685">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -67,8 +70,9 @@ output application/csv
 					</ee:message>
 				</ee:transform>
 				<logger level="INFO" doc:name="Logger" doc:id="67e546b0-f63e-4aed-9d8e-647afa388efa" message="Customer file does not exist, creating new file with incoming customer" />
-				<file:write doc:id="70006ade-6bc9-4ebb-bc30-4f91bceae36a" path="${customer.file.path}/${customer.file.name}" doc:name="Create new file with incoming customer" mode="CREATE_NEW" />
-			</otherwise>
+				<file:write doc:id="70006ade-6bc9-4ebb-bc30-4f91bceae36a" path="${customer.file.path}/${customer.file.name}" doc:name="Create new file with incoming customer"/>
+			
+</otherwise>
 		</choice>
 		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="set successful response">

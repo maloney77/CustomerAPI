@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="create-customer-test-suite.xml" />
+	<munit:test name="route-to-file-append" doc:id="c5f19a28-480c-4868-b80e-48afc1291cce" description="When the customer file exists, it should route to the file append connector with correct payload">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock file listing" doc:id="f9870fa9-7062-4944-9d54-c62813c5a011" processor="file:list">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="List files in directory" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="b83e72c5-fbac-42dc-b213-2e614dbc373a" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="existingFiles" value="#[output application/java --- {&quot;attributes&quot;: [{&quot;fileName&quot;: p('customer.file.name')}]}]" mediaType="application/java" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock file append" doc:id="24ae36a2-c06b-4455-a17f-0b97e1496932" processor="file:write">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Append record to existing file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9ab23b6e-30fe-476a-b946-10ab6e3631dc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d97267c0-71d2-4c5f-b835-dc9730ddfaec" >
+				<munit:payload value='#[output application/json --- {
+  "First Name": "John",
+  "Last Name": "Doe",
+  "Middle Name": "Edward",
+  "BirthDate": "24.03.1995",
+  "Height": 71,
+  "Weight": 187,
+  "Billing Street": "123 Main Street",
+  "Billing City": "St. Louis",
+  "Billing State": "Missouri",
+  "Billing Postal Code": "63222",
+  "Billing Country": "USA"
+}]' mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\customers:application\json:mseai-customer-management-system-config" doc:id="58b2f4c2-51e0-4f55-810e-16242a2005d8" name="post:\customers:application\json:mseai-customer-management-system-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="493eb0b3-c8b6-499e-a80c-73bbc6f4d46d" processor="file:write" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Append record to existing file" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9ab23b6e-30fe-476a-b946-10ab6e3631dc" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="route-to-file-create-new-file" doc:id="22023454-6005-4e33-8767-ed82a65f980a" description="When the customer file does not exist, it should route to the file create connector with correct payload">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock file listing" doc:id="8ef8b33b-081c-47d1-bf20-5f31712c7e72" processor="file:list">
+				<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="List files in directory" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="b83e72c5-fbac-42dc-b213-2e614dbc373a" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:variables >
+						<munit-tools:variable key="existingFiles" value='#[output application/java --- {"attributes": [{"fileName": "bad name"}]}]' mediaType="application/java" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+				<munit-tools:spy doc:name="Spy" doc:id="ca5f64a2-1774-47e6-8068-3d834424341b" processor="file:write">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Append record to existing file" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="9ab23b6e-30fe-476a-b946-10ab6e3631dc" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+					<munit-tools:before-call>
+						<munit-tools:assert-that doc:name="Assert that" doc:id="f81ec6ab-485d-4fdd-85bc-66402797e515" is='#[MunitTools::equalTo([
+  {
+    "Client Key": vars.clientKey,
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": now() as Number {unit: "milliseconds"}
+  }
+])]' expression="#[output application/json --- payload]"/>
+					</munit-tools:before-call>
+				</munit-tools:spy>
+				<munit-tools:mock-when doc:name="Mock file append" doc:id="60938a21-6a47-4964-a8b9-e6b1805de208" processor="file:write">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="70006ade-6bc9-4ebb-bc30-4f91bceae36a" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Create new file with incoming customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<munit:set-event doc:name="Set Event" doc:id="f4480a67-5898-4589-8556-b8a4ed71e442">
+					<munit:payload value='#[output application/json --- {
+  "First Name": "John",
+  "Last Name": "Doe",
+  "Middle Name": "Edward",
+  "BirthDate": "24.03.1995",
+  "Height": 71,
+  "Weight": 187,
+  "Billing Street": "123 Main Street",
+  "Billing City": "St. Louis",
+  "Billing State": "Missouri",
+  "Billing Postal Code": "63222",
+  "Billing Country": "USA"
+}]' mediaType="application/json" />
+				</munit:set-event>
+				<flow-ref doc:name="Flow-ref to post:\customers:application\json:mseai-customer-management-system-config" doc:id="a7a1c317-aa41-4377-9607-8463ea64e2b1" name="post:\customers:application\json:mseai-customer-management-system-config" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="a751f0f1-c6a5-4240-be99-707452dfd83b" processor="file:write" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="70006ade-6bc9-4ebb-bc30-4f91bceae36a" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Create new file with incoming customer" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
+
+
+</mule>
