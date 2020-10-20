@@ -181,6 +181,130 @@
 			</munit-tools:verify-call>
 		</munit:validation>
 	</munit:test>
+	<munit:test name="remove-customer-payload" doc:id="43bd9ef3-377a-4e20-a6ff-aaab6ea0ea62" description="remote customer should remove requested client from file payload">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock file read" doc:id="a36baa05-c547-4762-af4a-3352f405a9a3" processor="file:read">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Read Existing Customer File" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="75a51d4f-7a91-4ea1-8a71-28e0ab7ec546" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+					<munit-tools:then-return>
+						<munit-tools:payload value='#[output application/csv --- [
+  {
+    "Client Key": "6100f93f-f33e-4793-af15-78a254dda4ef",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143684782"
+  },
+  {
+    "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143720795"
+  },
+  {
+    "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "",
+    "Billing City": "",
+    "Billing State": "",
+    "Billing Postal Code": "",
+    "Billing Country": "",
+    "Created Date": "1603143721366"
+  }
+]]
+' mediaType="application/csv" />
+					</munit-tools:then-return>
+				</munit-tools:mock-when>
+				<munit-tools:spy doc:name="Spy on file overwrite" doc:id="e543766a-d3a6-41b4-937e-e11e4b1bcd9e" processor="file:write">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Overwrite existing file with new list, without inbound customer" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="ea29a4d0-1aff-4681-9312-6f52641ca4fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert-that doc:name="Assert that" doc:id="02264bcc-3300-4580-828b-d0cb140926c9" expression="#[output application/json --- payload]" is='#[MunitTools::equalTo([
+  {
+    "Client Key": "becf4d13-c862-4b8f-90a6-5514bee2c939",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "123 Main Street",
+    "Billing City": "St. Louis",
+    "Billing State": "Missouri",
+    "Billing Postal Code": "63222",
+    "Billing Country": "USA",
+    "Created Date": "1603143720795"
+  },
+  {
+    "Client Key": "7cc35cf8-68c5-4e9f-8286-87795767b474",
+    "BirthDate": "796003200000",
+    "First Name": "John",
+    "Middle Name": "Edward",
+    "Last Name": "Doe",
+    "Height": "71",
+    "Weight": "187",
+    "Billing Street": "",
+    "Billing City": "",
+    "Billing State": "",
+    "Billing Postal Code": "",
+    "Billing Country": "",
+    "Created Date": "1603143721366"
+  }
+])]'/>
+				</munit-tools:before-call>
+			</munit-tools:spy>
+			<munit-tools:mock-when doc:name="Mock file overwrite" doc:id="a944887b-8bac-4fe2-9733-f5eb826104b2" processor="file:write">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Overwrite existing file with new list, without inbound customer" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="ea29a4d0-1aff-4681-9312-6f52641ca4fd" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<munit:set-event doc:name="Set Event" doc:id="beaca262-f987-4957-87e6-6807e7f275bb">
+					<munit:attributes value='#[output application/java --- {
+	"queryParams": {
+		"clientKey": "6100f93f-f33e-4793-af15-78a254dda4ef"
+	}
+}]' mediaType="application/java" />
+				</munit:set-event>
+				<flow-ref doc:name="Flow-ref to delete:\customers:mseai-customer-management-system-config" doc:id="6beb75f3-9caa-451e-8a70-9223411f50f7" name="delete:\customers:mseai-customer-management-system-config" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify call" doc:id="61612091-31d2-4eec-9dd2-dab46d761037" processor="file:write" times="1">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Overwrite existing file with new list, without inbound customer" attributeName="doc:name" />
+						<munit-tools:with-attribute whereValue="ea29a4d0-1aff-4681-9312-6f52641ca4fd" attributeName="doc:id" />
+					</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+			</munit:validation>
+		</munit:test>
 
 
 </mule>
